@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard fade-in">
+
+  <h1 class="text-2xl mb-6 text-center">🔒 Review & Confirm VPN Fingerprint</h1>
+
+  <div class="w-full flex justify-center">
+    <p class="text-white text-sm text-center leading-snug" style="max-width: 28rem;">
+      <span class="block">Below is the network fingerprint detected</span>
+      <span class="block">while your VPN was active.</span>
+      <span class="block mt-2">
+        If this looks correct, hit <strong>Confirm</strong> to trust this configuration.
+      </span>
+    </p>
+  </div>
+
+  <div class="dashboard-grid">
+
+    <div class="stat-card blue">
+      <div class="stat-label">🌐 VPN Public IP</div>
+      <div class="stat-value monospace">{{ public_ip or 'Unknown' }}</div>
+    </div>
+
+    <div class="stat-card blue">
+      <div class="stat-label">🧭 VPN DNS Server</div>
+      <div class="stat-value monospace">
+        {% for dns in dns_servers %}
+          {{ dns }}<br>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="stat-card ok">
+      <div class="stat-label">Confirm Fingerprint</div>
+      <div class="stat-value">
+        <form method="POST" action="{{ url_for('onboarding.confirm') }}">
+          <button class="btn-primary w-full py-3 text-lg">
+            ✅ Confirm & Save
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="stat-card fail">
+      <div class="stat-label">Reset Onboarding</div>
+      <div class="stat-value">
+        <form method="GET" action="{{ url_for('onboarding.reset_onboarding') }}">
+          <button class="btn-secondary w-full py-3 text-lg">
+            🔄 Start Over
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

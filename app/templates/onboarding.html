@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard fade-in">
+
+  <div class="instructions-box">
+    {% if stage == 'start' %}
+      <p class="text-white">
+        Step 1: <strong>Turn OFF</strong> your VPN, then click “Next.”<br>
+        <span class="text-[#ababab] text-sm">(If your VPN is already off, just click “Next.”)</span>
+      </p>
+    {% elif stage == 'vpn_on' %}
+      <p class="text-white">
+        Step 2: <strong>Turn ON</strong> your VPN and wait ≈ 30–60 seconds.<br>
+        We’ll auto-detect the change.<br>
+        <span class="text-yellow-400">⚠️ Don’t click “Next” until we say so.</span><br>
+        <span class="text-[#ababab] text-sm">We’ll tell you when it’s safe to proceed.</span>
+      </p>
+    {% elif stage == 'review' %}
+      <p class="text-white">Analyzing results…</p>
+    {% endif %}
+  </div>
+
+  <form method="POST">
+    <div class="dashboard-grid">
+      {% if stage == 'start' %}
+        <!-- ISP IP -->
+        <div class="stat-card fail">
+          <div class="stat-label">
+            🚩 ISP Detected IP
+            <span class="tooltip"><span class="bulb-pulse">💡</span>
+              <span class="tooltiptext">
+                This is the IP address from your ISP, before VPN on. If this IP ever appears again after turning your VPN on, it means your VPN has failed and you are a fully exposed Leaky Meatbag.
+              </span>
+            </span>
+          </div>
+          <div class="stat-value monospace">{{ ip }}</div>
+        </div>
+
+        <!-- ISP DNS -->
+        <div class="stat-card fail">
+          <div class="stat-label">
+            🚩 ISP DNS Servers
+            <span class="tooltip"><span class="bulb-pulse">💡</span>
+              <span class="tooltiptext">
+                These are the DNS servers used before turning on your VPN. If any of these show up again while VPN is active, you're leaking DNS requests.
+              </span>
+            </span>
+          </div>
+          <div class="stat-value monospace">
+            {% for server in dns %}{{ server }}<br>{% endfor %}
+          </div>
+        </div>
+
+      {% elif stage == 'vpn_on' %}
+        <!-- VPN IP -->
+        <div class="stat-card {{ status_class }}">
+          <div class="stat-label">
+            🟢 Detected IP
+            <span class="tooltip"><span class="bulb-pulse">💡</span>
+              <span class="tooltiptext">
+                Your current public IP after VPN was turned ON. This should be different from your ISP IP if VPN is working.
+              </span>
+            </span>
+          </div>
+          <div class="stat-value monospace" id="current-ip">Checking...</div>
+        </div>
+
+        <!-- VPN DNS -->
+        <div class="stat-card {{ status_class }}">
+          <div class="stat-label">
+            🟢 Detected DNS Servers
+            <span class="tooltip"><span class="bulb-pulse">💡</span>
+              <span class="tooltiptext">
+                These are the current DNS servers used with your VPN. They should not match your ISP DNS if your VPN is working properly.
+              </span>
+            </span>
+          </div>
+          <div class="stat-value monospace" id="current-dns">Checking...</div>
+        </div>
+
+        <!-- Polling Status -->
+        <div class="stat-card {{ status_class }}">
+          <div class="stat-label">Status</div>
+          <div class="stat-value" id="polling-status">
+            ⏳ Waiting for network change<span id="dots">.</span>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div style="display: flex; justify-content: center; width: 100%; margin-top: 1.5rem;">
+      <button id="next-btn" type="submit" class="btn-primary" {% if stage == 'vpn_on' %}disabled{% endif %}>
+        Next
+      </button>
+    </div>
+  </form>
+</div>
+
+{% if stage == 'vpn_on' %}
+  <script>
+    window.baselineIP = {{ ip|tojson }};
+    window.baselineDNS = {{ dns|tojson }};
+  </script>
+  <script src="/static/js/onboarding.js"></script>
+{% endif %}
+{% endblock %}

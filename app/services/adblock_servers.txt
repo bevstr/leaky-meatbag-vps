@@ -1,0 +1,10 @@
+https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js
+https://track.adform.net/serving/scripts/trackpoint/async/
+https://tr.snapchat.com/cm.js
+https://widgets.outbrain.com/outbrain.js
+https://static.criteo.net/js/ld/ld.js
+https://securepubads.g.doubleclick.net/tag/js/gpt.js
+https://bat.bing.com/bat.js
+https://ads.pubmatic.com/AdServer/js/showad.js
+
+

@@ -1,0 +1,11 @@
+check_interval_seconds: 600
+device_alias: ""
+
+dns_servers: []
+trusted_ips: []
+isp_ip: ""
+
+enable_nostr: true
+log_retention_days: 30
+nostr_pubkey: npub1yourkeyhere
+send_dm: true

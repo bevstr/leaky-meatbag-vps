@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard">
+
+  <h1 class="text-2xl mb-6 heading-colour page-heading">
+    <img src="{{ url_for('static', filename='img/icon-small.png') }}" alt="Leaky Meatbag Logo" style="height: 1.7em; vertical-align: middle; margin-right: 0.5em;">
+    Leaky Meatbag Config
+  </h1>
+
+  <form id="config-form" onsubmit="saveSettings(event)">
+
+    <div class="dashboard-grid">
+
+      <!-- Device Alias -->
+      <div class="stat-card blue">
+        <div class="stat-label">🖥️ Device Alias</div>
+        <div id="device-alias-error" class="error-message" style="display: none;"></div>
+        <div class="stat-value">
+          <input type="text" id="device_alias" name="device_alias" value="{{ config.device_alias }}" class="input-field" placeholder="Enter Device Name">
+        </div>
+      </div>
+
+      <!-- Trusted IPs -->
+      <div class="stat-card blue">
+        <div class="stat-label">🌐 VPN IP(s)</div>
+        <div id="trusted-ips-error" class="error-message" style="display: none;"></div>
+        
+        <div class="stat-value">
+          <input type="text" id="trusted_ips" name="trusted_ips" value="{{ config.trusted_ips | join(', ') }}" class="input-field" placeholder="Enter VPN IP(s)">
+      
+          <!-- Detect Button with Tooltip -->
+          <div class="detect-button-row">
+            <div class="tooltip">
+              <button type="button" onclick="detectPublicIP('trusted_ips')" class="detect-button">
+                Detect VPN IP <span class="bulb-pulse">💡</span>
+              </button>
+              <span class="tooltiptext">Detects current IP. Make sure VPN is active!</span>
+            </div>
+      
+            <!-- IP Detected Confirmation (THIS MUST STAY INSIDE THE CARD) -->
+            <div class="detect-confirmation" id="detect-confirmation" style="display: none;">
+              ✅ IP Detected!
+            </div>
+          </div> <!-- End of detect-button-row -->
+      
+        </div> <!-- End of stat-value -->
+      </div> <!-- End of stat-card blue -->
+            
+
+      <!-- DNS Servers -->
+      <div class="stat-card blue">
+        <div class="stat-label">🧭 VPN DNS</div>
+        <div id="dns-servers-error" class="error-message" style="display: none;"></div>
+        <div class="stat-value">
+          <input type="text" id="dns_servers" name="dns_servers" value="{{ config.dns_servers | join(', ') }}" class="input-field" placeholder="Enter VPN DNS">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Save Status Message -->
+    <div id="save-status" class="save-status hidden"></div>
+
+    <div class="buttons-row">
+      <button type="submit" class="save-button">💾 Save Settings</button>
+    
+      <a href="{{ url_for('dashboard.dashboard') }}"
+         class="back-button"
+         {% if from_onboarding %} style="pointer-events: none; opacity: 0.5; cursor: not-allowed;" title="Save settings before returning" {% endif %}>
+        <img src="{{ url_for('static', filename='img/icon-small.png') }}" alt="Brain" style="height: 1em; vertical-align: middle; margin-right: 0.5em;">
+        Back to Dashboard
+      </a>
+    </div>
+    
+  </form>
+
+</div>
+
+<script>
+  function validateDeviceAlias() {
+  const aliasInput = document.getElementById("device_alias");
+  const errorDiv = document.getElementById("device-alias-error");
+  const alias = aliasInput.value.trim();
+
+  const aliasRegex = /^[a-zA-Z0-9 _-]+$/; // Letters, numbers, spaces, hyphens, underscores
+
+  if (alias === "") {
+    errorDiv.innerText = "Device Alias cannot be empty.";
+    errorDiv.style.display = "block";
+    return false;
+  }
+
+  if (!aliasRegex.test(alias)) {
+    errorDiv.innerText = "Device Alias can only contain letters, numbers, spaces, hyphens, and underscores.";
+    errorDiv.style.display = "block";
+    return false;
+  }
+
+  // Valid input
+  errorDiv.innerText = "";
+  errorDiv.style.display = "none";
+  return true;
+}
+
+function validateTrustedIPs() {
+  const trustedIpsInput = document.getElementById("trusted_ips");
+  const errorDiv = document.getElementById("trusted-ips-error");
+  const ips = trustedIpsInput.value.split(",").map(ip => ip.trim()).filter(ip => ip.length > 0);
+
+  if (ips.length === 0) {
+    errorDiv.innerText = "Please enter at least one VPN IP.";
+    errorDiv.style.display = "block";
+    return false;
+  }
+
+  const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])){3}$/;
+
+  for (const ip of ips) {
+    if (!ipv4Regex.test(ip)) {
+      errorDiv.innerText = `Invalid IP address: ${ip}`;
+      errorDiv.style.display = "block";
+      return false;
+    }
+  }
+
+  // All good
+  errorDiv.innerText = "";
+  errorDiv.style.display = "none";
+  return true;
+}
+
+function validateDnsServers() {
+  const dnsServersInput = document.getElementById("dns_servers");
+  const errorDiv = document.getElementById("dns-servers-error");
+  const servers = dnsServersInput.value.split(",").map(ip => ip.trim()).filter(ip => ip.length > 0);
+
+  if (servers.length === 0) {
+    errorDiv.innerText = "Please enter at least one VPN DNS Server.";
+    errorDiv.style.display = "block";
+    return false;
+  }
+
+  const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])){3}$/;
+
+  for (const server of servers) {
+    if (!ipv4Regex.test(server)) {
+      errorDiv.innerText = `Invalid DNS Server address: ${server}`;
+      errorDiv.style.display = "block";
+      return false;
+    }
+  }
+
+  // All good
+  errorDiv.innerText = "";
+  errorDiv.style.display = "none";
+  return true;
+}
+
+async function detectPublicIP(fieldId) {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    if (!response.ok) {
+      throw new Error('Failed to fetch IP');
+    }
+
+    const data = await response.json();
+    const field = document.getElementById(fieldId);
+    if (field) {
+      field.value = data.ip;
+      validateTrustedIPs(); // re-validate after filling
+    }
+  } catch (error) {
+    console.error('Detect IP failed:', error);
+    alert('Failed to detect IP address. Please check your connection.');
+  }
+  
+    const confirmation = document.getElementById('detect-confirmation');
+    if (confirmation) {
+      confirmation.style.display = 'block';
+      confirmation.style.opacity = '1';
+      confirmation.style.transition = 'opacity 1s ease';
+
+    setTimeout(() => {
+      confirmation.style.opacity = '0';
+      setTimeout(() => {
+        confirmation.style.display = 'none';
+      }, 1000); // Match fade out
+    }, 2000); // Visible for 2 seconds
+  }
+
+}
+
+
+
+  async function saveSettings(event) {
+    event.preventDefault();
+
+    if (!validateDeviceAlias()) {
+      return; // Stop if invalid
+    }
+    if (!validateTrustedIPs()) {
+  return;
+    }
+    if (!validateDnsServers()) {
+      return;
+    }
+  
+    const form = document.getElementById('config-form');
+    const formData = new FormData(form);
+  
+    const jsonData = {};
+    formData.forEach((value, key) => {
+      if (key === "trusted_ips" || key === "dns_servers") {
+        jsonData[key] = value.split(',').map(v => v.trim());
+      } else {
+        jsonData[key] = value.trim();
+      }
+    });
+  
+    try {
+      const response = await fetch("/api/save-config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(jsonData)
+      });
+  
+      if (!response.ok) throw new Error("Failed to save settings");
+  
+      const status = document.getElementById('save-status');
+      status.classList.remove('hidden');
+      status.innerText = "✅ Settings Saved!";
+      status.style.color = "#43a047"; // Green
+      status.style.opacity = "0"; // Start invisible
+      status.style.transition = "opacity 0.6s ease"; // Smooth fade
+  
+      // Force a reflow to apply transition cleanly
+      void status.offsetWidth;
+  
+      status.style.opacity = "1"; // Then fade in
+  
+      setTimeout(() => {
+        status.style.opacity = "0"; // Fade out again after delay
+        setTimeout(() => {
+          status.classList.add('hidden'); // Finally hide it completely
+        }, 600); // match transition time
+      }, 3000); // show message for 3s before fading out
+  
+      // ✅ --- NEW: Re-enable the "Back to Dashboard" button ---
+      const backButton = document.querySelector('.back-button');
+      if (backButton) {
+        backButton.style.pointerEvents = 'auto';
+        backButton.style.opacity = '1';
+        backButton.style.cursor = 'pointer';
+        backButton.removeAttribute('title'); // Optional: remove the tooltip "Save settings before returning"
+      }
+
+    } catch (error) {
+      console.error("Save failed:", error);
+      const status = document.getElementById('save-status');
+      status.classList.remove('hidden');
+      status.innerText = "❌ Save Failed!";
+      status.style.color = "#e53935"; // Red
+      status.style.opacity = "0";
+      status.style.transition = "opacity 0.6s ease";
+      void status.offsetWidth;
+      status.style.opacity = "1";
+  
+      setTimeout(() => {
+        status.style.opacity = "0";
+        setTimeout(() => {
+          status.classList.add('hidden');
+        }, 600);
+      }, 3000);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+
+  // Auto-clear error while typing
+  document.getElementById("device_alias").addEventListener("input", function() {
+    validateDeviceAlias();
+  });
+  document.getElementById("trusted_ips").addEventListener("input", function() {
+    validateTrustedIPs();
+  });
+  document.getElementById("dns_servers").addEventListener("input", function() {
+    validateDnsServers();
+  });
+});
+
+  </script>
+  
+
+{% endblock %}

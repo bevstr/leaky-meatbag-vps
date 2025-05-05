@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard">
+
+  <h1 class="text-2xl mb-6 heading-colour page-heading">
+    <img src="{{ url_for('static', filename='img/icon-small.png') }}" alt="Leaky Meatbag Logo" style="height: 1.7em; vertical-align: middle; margin-right: 0.5em;">
+    Leak History
+  </h1>
+  
+  <p class="leak-intro-text">
+    This page catches DNS leaks — if your VPN screws up, we catch it. A DNS leak means your ISP sees every site you touch, logs it, and maybe sells it. See if you’re leaking right now, and when the last leak happened.
+  </p>
+
+  <div id="leak-status-container"></div>
+
+  <hr style="border: none; border-top: 1px solid #444; margin: 3rem auto 2rem auto; width: 80%;">
+
+  <!-- 🧭 Graph Container with Dropdown and Graph Canvas -->
+  <div style="width: 100%; max-width: 800px; margin: 1.5rem auto 1rem auto; text-align: center;">
+
+    <!-- 🔧 Time Range Selector -->
+    <div style="display: inline-flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+      <label for="range-select" style="color: #f3812c; font-size: 1.1rem;">Select Time Range:</label>
+      <select id="range-select" onchange="renderLeakGraph()" style="
+        background-color: #2c1b00;
+        color: #f3812c;
+        border: 1px solid #f3812c;
+        padding: 0.4em 0.8em;
+        border-radius: 6px;
+      ">
+        <option value="1">Last 24 Hours</option>
+        <option value="7" selected>Last 7 Days</option>
+        <option value="30">Last 30 Days</option>
+      </select>
+    </div>
+
+    <!-- 📈 Leak Graph -->
+    <div class="leak-graph-container">
+      <canvas id="leakGraph"></canvas>
+    </div>
+
+    <!-- ⏱️ Last Updated + Manual Refresh -->
+    <div id="last-updated-container" style="margin-top: 1.8rem; text-align: center;">
+      <span id="last-updated" class="last-updated" style="margin-right: 1rem; color: #bababa;"></span>
+      <button onclick="renderLeakGraph()" class="btn-refresh" style="
+        background-color: #2c1b00;
+        color: #f3812c;
+        border: 1px solid #f3812c;
+        padding: 0.3rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        cursor: pointer;
+      ">
+        🔄 Refresh
+      </button>
+    </div>
+
+    <!-- ✅ Proper mobile-safe footer space -->
+    <div style="height: 5rem;"></div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    async function fetchSnapshot() {
+      const response = await fetch("/api/leak-snapshot");
+      const data = await response.json();
+
+      const container = document.getElementById("leak-status-container");
+      container.innerHTML = "";
+
+      const leakBox = document.createElement("div");
+      leakBox.className = "status-box " + (data.currently_leaking ? "red-border" : "green-border");
+      leakBox.innerHTML = data.currently_leaking
+        ? "🔴 <strong>Currently Leaking</strong>"
+        : "✅ <strong>No Current Leak</strong>";
+      container.appendChild(leakBox);
+
+      if (data.last_leak_time) {
+        const timeBox = document.createElement("div");
+        timeBox.className = "status-box red-border";
+        timeBox.innerHTML = `🕓 <strong>Last Leak Seen:</strong> ${data.last_leak_time}`;
+        container.appendChild(timeBox);
+      }
+
+      if (data.leaked_domains && data.leaked_domains.length > 0) {
+        const domainBox = document.createElement("div");
+        domainBox.className = "status-box red-border";
+        domainBox.innerHTML = `
+          <div class="leak-title">🌐 Leaked Domains:</div>
+          <ul class="leak-list">
+            ${data.leaked_domains.map(domain => `<li>${domain}</li>`).join("")}
+          </ul>
+        `;
+        container.appendChild(domainBox);
+      }
+    }
+
+    async function renderLeakGraph() {
+      const rangeDays = document.getElementById("range-select").value;
+      const res = await fetch(`/api/leak-graph-data?days=${rangeDays}`);
+      const data = await res.json();
+
+      const labels = data.map(entry => entry.timestamp);
+      const values = data.map(entry => entry.leak ? 1 : 0);
+
+      const ctx = document.getElementById("leakGraph").getContext("2d");
+
+      if (window.leakChart) {
+        window.leakChart.destroy();
+      }
+
+      window.leakChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "Leak Status Over Time",
+            data: values.map(() => 1),
+            backgroundColor: values.map(v => v === 1 ? "#ef4444" : "#22c55e"),
+            borderRadius: 3,
+            barPercentage: 1.0,
+            categoryPercentage: 1.0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: {
+              left: 10,
+              right: 30
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: ctx => values[ctx.dataIndex] === 1 ? "🔴 Leak Detected" : "✅ No Leak",
+                title: ctx => {
+                  const date = new Date(ctx[0].label);
+                  return date.toLocaleString('en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }).replace(',', '');
+                }
+              },
+              bodyFont: { size: 16 },
+              titleFont: { size: 14 },
+              padding: 10,
+              displayColors: false
+            },
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              display: false
+            },
+            x: {
+              offset: true,
+              grace: '5%',
+              ticks: {
+                maxTicksLimit: 10,
+                autoSkip: true,
+                callback: function(value, index, ticks) {
+                  if (index === 0 || index === ticks.length - 1) return "";
+                  const date = new Date(this.getLabelForValue(value));
+                  return date.toLocaleString('en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  });
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // 🕓 Update "Last Updated" timestamp
+      document.getElementById("last-updated").innerText =
+        "Last updated: " + new Date().toLocaleString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).replace(',', '');
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchSnapshot();
+      renderLeakGraph();
+      setInterval(fetchSnapshot, 10000);
+    });
+  </script>
+
+</div>
+{% endblock %}
+

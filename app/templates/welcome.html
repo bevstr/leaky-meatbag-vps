@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard fade-in">
+  <div class="welcome-box orange">
+    <h2 class="text-2xl mb-4">
+      <img src="{{ url_for('static', filename='img/icon-small.png') }}" alt="Leaky Meatbag Icon"
+           style="height: 1.5em; vertical-align: middle; margin-right: 0.5em;">
+      Welcome to VPN Fingerprint Setup
+    </h2>
+    
+    <p class="mb-4">
+      Before we begin, please <strong>TURN OFF your VPN</strong>.<br><br>
+      We need to record your current IP and DNS as your ISP fingerprint.<br>
+      You’ll then turn ON the VPN and we’ll capture the new fingerprint.<br><br>
+      This ensures we can detect leaks accurately.
+    </p>
+    <a href="{{ url_for('onboarding.onboarding') }}" class="btn-primary">Got it — VPN is OFF</a>
+  </div>
+</div>
+
+<style>
+  .welcome-box {
+    background: #1a1a1a;
+    border: 1px solid #fd7405;
+    padding: 2em;
+    max-width: 600px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #000;
+    margin: 4em auto;
+    text-align: center;
+    font-family: monospace;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 768px) {
+    .welcome-box {
+      padding: 1.5em;
+      margin: 2em 1em;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,70 @@
+
+Snapshot a clean directory tree (ignores .git, venv, caches, .DS_Store)
+tree -a -I '.git|venv|__pycache__|.DS_Store' > structure.txt
+
+
+
+.
+├── .gitignore
+├── app
+│   ├── __init__.py
+│   ├── routes
+│   │   ├── config.py
+│   │   ├── dashboard.py
+│   │   ├── onboarding.py
+│   │   └── styleguide.py
+│   ├── services
+│   │   ├── adblock_checker.py
+│   │   ├── adblock_leak_log.txt
+│   │   ├── adblock_servers.txt
+│   │   ├── config_loader.py
+│   │   ├── ip_checker.py
+│   │   ├── leak_state.py
+│   │   ├── log_parser.py
+│   │   └── status_service.py
+│   ├── static
+│   │   ├── css
+│   │   │   └── main.css
+│   │   ├── img
+│   │   │   ├── favicon-blocked.ico
+│   │   │   ├── favicon.ico
+│   │   │   ├── icon-small-blocked.png
+│   │   │   ├── icon-small.png
+│   │   │   ├── leaky-meatbag-logo.png
+│   │   │   ├── leaky-meatbag.png
+│   │   │   └── PWA
+│   │   │       ├── ChatGPT Image Apr 24, 2025, 08_52_50 PM.png
+│   │   │       ├── ChatGPT Image Apr 24, 2025, 10_16_42 PM.png
+│   │   │       ├── icon-192x192 old.png
+│   │   │       ├── icon-192x192.png
+│   │   │       ├── icon-512-512 old.png
+│   │   │       └── icon-512x512.png
+│   │   ├── js
+│   │   │   ├── dashboard.js
+│   │   │   └── onboarding.js
+│   │   ├── manifest.json
+│   │   └── service-worker.js
+│   └── templates
+│       ├── base.html
+│       ├── config.html
+│       ├── dashboard.html
+│       ├── leak_history.html
+│       ├── onboarding_review.html
+│       ├── onboarding.html
+│       └── welcome.html
+├── config-empty.yml
+├── config.yml
+├── docker
+├── docs
+│   └── TODO.md
+├── entrypoint.sh
+├── LICENSE
+├── README.md
+├── requirements.txt
+├── run.py
+├── start.sh
+├── structure.txt
+├── structureold.txt
+└── test_config.py
+
+12 directories, 50 files

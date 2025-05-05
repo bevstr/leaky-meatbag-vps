@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Leaky Meatbag</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <!-- Favicon -->
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <meta name="theme-color" content="#0f0f0f" />
+
+  <!-- Apple iOS PWA Support -->
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/PWA/icon-192.png') }}">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <style>
+    #splash-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: #bababa;
+      font-family: monospace;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-size: 3.5rem;
+      z-index: 9999;
+      opacity: 1;
+      transition: opacity 1s ease-out;
+      overflow: hidden;
+    }
+    #splash-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #splash-watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40%;
+      opacity: 0.08;
+      pointer-events: none;
+      z-index: 0;
+    }
+    #splash-text-container div {
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SPLASH SCREEN -->
+  <div id="splash-screen">
+    <img src="{{ url_for('static', filename='img/icon-small.png') }}" alt="Watermark" id="splash-watermark">
+    <div id="splash-text-container"></div>
+  </div>
+
+  <nav>
+    <a href="/">
+      <img src="{{ url_for('static', filename='img/leaky-meatbag-logo.png') }}" alt="Leaky Meatbag" style="height: 40px; vertical-align: middle;">
+    </a>
+    <a href="/">Dashboard</a>
+    <a href="{{ url_for('dashboard.leak_history') }}">Leak History</a>
+    <a href="/config">Config</a>
+  </nav>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/service-worker.js')
+          .then(reg => console.log("✅ Service Worker registered:", reg.scope))
+          .catch(err => console.error("❌ Service Worker registration failed:", err));
+      });
+    }
+
+    /*
+    // 💡 Check if splash has already been shown this session
+    if (!sessionStorage.getItem('splashShown')) 
+      sessionStorage.setItem('splashShown', 'true');
+
+      Delete below two lines to bring back screen change words liek freaks etc also 
+      at end of file 
+    */
+
+    if (!sessionStorage.getItem('splashShown')) {
+      sessionStorage.setItem('splashShown', 'true'); 
+
+    
+    const taglines = [
+      "Meatbag Free Since Boot",
+      "Zero Meatbags\nZero Leaks\nZero Fucks\nSince Boot",
+      "Catch You...\nOn the\nMeatbag Side\nFreaks",
+      "Keep It Leaky Freaks",
+    ];
+
+    // Tagline-specific highlight words
+    const taglineHighlights = {
+      "Meatbag Free Since Boot": ["Meatbag"],
+      "Zero Meatbags\nZero Leaks\nZero Fucks\nSince Boot": ["Zero Fucks"],
+      "Catch You...\nOn the\nMeatbag Side\nFreaks": ["Freaks"],
+      "Keep It Leaky Freaks": ["Freaks"]
+    };
+
+    const splashText = document.getElementById("splash-text-container");
+    splashText.innerHTML = "";
+
+    const tagline = taglines[Math.floor(Math.random() * taglines.length)];
+    const highlightWords = taglineHighlights[tagline] || [];
+    const words = tagline.includes("\n") ? tagline.split("\n") : tagline.split(" ");
+
+    function typeWords(index = 0) {
+      if (index < words.length) {
+        const wordDiv = document.createElement("div");
+        wordDiv.textContent = words[index];
+
+        if (highlightWords.includes(words[index])) {
+          wordDiv.style.color = "#f3812c";
+        }
+
+        wordDiv.style.opacity = 0;
+        wordDiv.style.transition = "opacity 0.5s ease-in";
+        splashText.appendChild(wordDiv);
+
+        void wordDiv.offsetWidth;
+        wordDiv.style.opacity = 1;
+
+        setTimeout(() => typeWords(index + 1), 500);
+      } else {
+        setTimeout(() => {
+          document.getElementById("splash-screen").classList.add("hidden");
+        }, 2000);
+      }
+    }
+
+    window.addEventListener("load", () => {
+      typeWords();
+    });
+
+    /*
+    } else {
+      // Already shown → hide splash immediately
+      const splash = document.getElementById("splash-screen");
+      if (splash) {
+        splash.style.display = "none";
+      }
+    }
+
+    delete the below to bring back the screen words on page change
+    */
+
+  
+    } else {
+      // Already shown → hide splash immediately
+      const splash = document.getElementById("splash-screen");
+      if (splash) {
+        splash.style.display = "none";
+      }
+    }
+    
+
+
+
+  </script>
+
+</body>
+</html>
