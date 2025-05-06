@@ -1,5 +1,9 @@
+# app/services/ip_checker.py
+
 import socket
 import requests
+import subprocess
+import platform
 
 def get_public_ip():
     try:
@@ -10,13 +14,22 @@ def get_public_ip():
 
 def get_dns_server():
     try:
-        # macOS: Use scutil to get DNS server info
-        import subprocess
-        result = subprocess.run(["scutil", "--dns"], capture_output=True, text=True)
-        lines = result.stdout.splitlines()
-        for line in lines:
-            if "nameserver" in line.lower():
-                return line.split()[-1]
+        system = platform.system()
+
+        if system == "Darwin":  # macOS
+            result = subprocess.run(["scutil", "--dns"], capture_output=True, text=True)
+            lines = result.stdout.splitlines()
+            for line in lines:
+                if "nameserver" in line.lower():
+                    return line.split()[-1]
+
+        elif system == "Linux":  # Docker or VPS
+            with open("/etc/resolv.conf", "r") as f:
+                for line in f:
+                    if line.startswith("nameserver"):
+                        return line.split()[1]
+
     except Exception:
         pass
+
     return "Unknown"

@@ -8,4 +8,4 @@ log_retention_days: 30
 nostr_pubkey: npub1yourkeyhere
 send_dm: true
 trusted_ips:
-- 138.199.60.10
+- 138.199.21.234
