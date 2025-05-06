@@ -660,36 +660,36 @@ body {
   display: inline-block;
 }
 
-/* Tooltip for detect ip button */
 .tooltip .tooltiptext {
+  width: 240px;
+  position: absolute;
+  left: 50%; /* ← anchors to center */
+  transform: translateX(-50%) translateY(20px); /* ← shifts box left to center it */
+  bottom: 243%;
+
+  /* Style stuff */
   font-family: monospace;
   font-size: 1.2em;
-  width: 240px;
-  font-weight: 400; /* Force it to regular */
+  font-weight: 400;
   color: #fd7405;
   background-color: #333;
   border: 1px solid #fd7405;
   border-radius: 8px;
   padding: 0.5rem;
-  position: absolute;
-  z-index: 1;
-  bottom: 243%;
-  left: 50%;
-  margin-left: -210px;
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.3s ease;
   text-align: center;
+  z-index: 1;
+  transition: opacity 0.6s ease, transform 0.3s ease;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-
 .tooltip:hover .tooltiptext {
   visibility: visible;
   opacity: 1;
-  transform: translateY(0); /* Move UP to natural position */
+  transform: translateX(-50%) translateY(0);
 }
+
 .detect-confirmation {
   color: #fd7405;
   font-family: monospace;

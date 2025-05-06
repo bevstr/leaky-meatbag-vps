@@ -54,19 +54,16 @@
     {% if isp_ip %}
     <!-- ISP IP Fingerprint -->
     <div id="isp-ip-card" class="stat-card fail">
-      <div class="stat-label">
-        🛑 ISP IP Fingerprint
-        <span class="tooltip"> <span class="bulb-pulse">💡</span>
-          <span class="tooltiptext">
-            This is your public IP before VPN was turned on. If you ever see this IP appear again, your VPN has dropped and you're fully exposed, AKA Leaky Meatbag.
-          </span>
+      <div class="stat-label tooltip">
+        🛑 ISP IP Fingerprint <span class="bulb-pulse">💡</span>
+        <span class="tooltiptext">
+          This is your public IP before VPN was turned on. If you ever see this IP appear again, your VPN has dropped and you're fully exposed, AKA Leaky Meatbag.
         </span>
       </div>
       <div class="stat-value monospace">{{ isp_ip }}</div>
     </div>
     {% endif %}
-
-
+    
     <!-- GEO Location -->
     <div class="stat-card blue">
       <div class="stat-label">🌍 VPN Exit Location</div>
