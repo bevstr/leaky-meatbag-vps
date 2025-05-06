@@ -1,6 +1,11 @@
 # run.py  (replace whole file)
 from app import create_app
 import socket
+import os
+
+# Create logs directory if it doesn't exist
+os.makedirs("logs", exist_ok=True)
+
 
 def find_open_port(start=5100, end=5200):
     for port in range(start, end):
