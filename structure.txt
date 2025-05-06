@@ -1,10 +1,8 @@
-
-Snapshot a clean directory tree (ignores .git, venv, caches, .DS_Store)
-tree -a -I '.git|venv|__pycache__|.DS_Store' > structure.txt
+.tree -a -I '.git|venv|__pycache__|.DS_Store' > structure.txt
 
 
 
-.
+
 ├── .gitignore
 ├── app
 │   ├── __init__.py
@@ -15,7 +13,6 @@ tree -a -I '.git|venv|__pycache__|.DS_Store' > structure.txt
 │   │   └── styleguide.py
 │   ├── services
 │   │   ├── adblock_checker.py
-│   │   ├── adblock_leak_log.txt
 │   │   ├── adblock_servers.txt
 │   │   ├── config_loader.py
 │   │   ├── ip_checker.py
@@ -54,17 +51,18 @@ tree -a -I '.git|venv|__pycache__|.DS_Store' > structure.txt
 │       └── welcome.html
 ├── config-empty.yml
 ├── config.yml
-├── docker
 ├── docs
 │   └── TODO.md
 ├── entrypoint.sh
 ├── LICENSE
+├── logs
+│   └── adblock_leak_log.txt
 ├── README.md
 ├── requirements.txt
 ├── run.py
-├── start.sh
+├── start_LeakyMeatbag.sh
 ├── structure.txt
-├── structureold.txt
-└── test_config.py
+├── test_config.py
+└── xxxxlogs
 
-12 directories, 50 files
+13 directories, 49 files
