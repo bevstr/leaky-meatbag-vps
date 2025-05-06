@@ -661,7 +661,7 @@ body {
 }
 
 .tooltip .tooltiptext {
-  width: 240px;
+  width: 270px;
   position: absolute;
   left: 50%; /* ← anchors to center */
   transform: translateX(-50%) translateY(20px); /* ← shifts box left to center it */
@@ -688,6 +688,15 @@ body {
   visibility: visible;
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* 🎯 OVERRIDES TO ALIGN TOOLTIP HEIGHT VISUALLY */
+.detect-button-row .tooltip .tooltiptext {
+  bottom: 210%;
+}
+
+#isp-ip-card .tooltip .tooltiptext {
+  bottom: 230%;
 }
 
 .detect-confirmation {
