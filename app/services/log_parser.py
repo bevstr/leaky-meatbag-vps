@@ -2,8 +2,9 @@
 
 import os
 from datetime import datetime
+from app.services.config_loader import LOGS_DIR
 
-LOG_PATH = os.path.join(os.path.dirname(__file__), "adblock_leak_log.txt")
+LOG_PATH = os.path.join(LOGS_DIR, "adblock_leak_log.txt")
 
 def parse_log():
     data = []

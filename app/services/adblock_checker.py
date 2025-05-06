@@ -5,10 +5,10 @@ import time
 import threading
 from datetime import datetime, timedelta
 from app.services.leak_state import leak_state
-from app.services.config_loader import config
+from app.services.config_loader import config, LOGS_DIR
 
 ADBLOCK_SERVERS_FILE = os.path.join(os.path.dirname(__file__), "adblock_servers.txt")
-ADBLOCK_LEAK_LOG_FILE = os.path.join(os.path.dirname(__file__), "adblock_leak_log.txt")
+ADBLOCK_LEAK_LOG_FILE = os.path.join(LOGS_DIR, "adblock_leak_log.txt")
 
 # ✨ NEW FAST CHECK MODE
 FAST_CHECK = True  # Set True to use HEAD requests instead of full GET

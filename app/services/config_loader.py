@@ -3,6 +3,14 @@ import os
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), '..', 'config.yml')
 
+# --- Add this block below ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOGS_DIR = os.path.join(BASE_DIR, "..", "..", "logs")
+
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
+# ----------------------------
+
 DEFAULT_CONFIG = {
     "device_alias": "MeatNode_01",
     "enable_nostr": False,
