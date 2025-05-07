@@ -172,3 +172,6 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Ignore adblock leak logs
+logs/adblock_leak_log.txt
